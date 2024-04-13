@@ -35,11 +35,31 @@ def test_google():
 
 @app.route("/process-user-message/", methods=["POST"])
 def process_user_message():
+    '''
+        This endpoint will take in a user's message and process it accordingly.
+        If the user's message is the first in a thread, do the following:
+            1. Use gemini 1.0 to parse the message for the product description and any product factors the user has specified
+            2. Use gemini to generated any remaining product factors for a total of 6
+            3. Store the product description and product factors in the database
+            4. Create a message thread for the message and store both the thread and message in the database
+            5. Start an asynchronous task to ask gemini 1.5 to generate a list of products that match the user's product description
+        For all incoming messages:
+            1. Store the message in the database with the incoming message thread
+            2. If there is a product_factor_id on the incoming payload, store the product factor in the database and ask gemini 1.5 to generate ratings, values and descriptions for each real product in the db
+            3. If the user has not reached 6 product factors in the current message thread,
+            use gemini 1.0 to generate a prompt for the user for one of the factors that have not gotten user input yet
+            4. If the user has reached 6 product factors, send back a boolean flag move_to_compare to indicate that the user can now compare products
+    '''
     pass
 
 
 @app.route("/get-compare-list/", methods=["POST"])
 def get_compare_list():
+    '''
+        This endpoint will take in either a user's list of product ids that they want to compare,
+        or a user's message thread id that they want to compare the products from.
+        For each product id, return all the generated product factors/generated ratings for the product as a dictionary
+    '''
     pass
 
 

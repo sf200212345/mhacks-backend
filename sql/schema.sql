@@ -75,3 +75,5 @@ create table generated_product_factor(
 
 /*user with id=0 refers to the AI prompter*/
 insert into user(id, username) values(0, "AI");
+/*default test user with id=1*/
+insert into user(id, username) values(1, "test_user");
