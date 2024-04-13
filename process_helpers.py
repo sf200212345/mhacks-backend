@@ -1,5 +1,6 @@
 from google_api import *
-
+import flask
+import threading
 
 def handle_first_message(request_body, connection) -> str:
     '''
@@ -47,8 +48,61 @@ def handle_first_message(request_body, connection) -> str:
                                 (product_description_id, factor_name,))
 
 
-def handle_message_generic(request_body, connection):
+def handle_message_generic(request_body, connection, user_message_parsed: bool):
     '''
         This function needs to return a response and response code
+    '''
+    if request_body.get("user_id") is None or not isinstance(request_body.get("user_id"), int):
+        return flask.jsonify({"message": "user_id is missing or not a number"}), 400
+    user_id = request_body.get("user_id")
+    
+    if request_body.get("user_message") is None or request_body.get("user_message") == "":
+        return flask.jsonify({"message": "user_message is missing"}), 400
+    user_message = request_body.get("user_message")
+
+    if request_body.get("message_thread_id") is None or not isinstance(request_body.get("message_thread_id"), int):
+        return flask.jsonify({"message": "message_thread_id is missing or not a number"}), 400
+    message_thread_id = request_body.get("message_thread_id")
+
+    # save message to db
+    connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
+                        (message_thread_id, user_id, user_message,))
+
+    # figure out the user feedback for the current product factor if specified
+    if not user_message_parsed:
+        if request_body.get("product_factor_id") is not None and not isinstance(request_body.get("product_factor_id"), int):
+            return flask.jsonify({"message": "product_factor_id is not a number"}), 400
+        product_factor_id = request_body.get("product_factor_id")
+        cursor = connection.execute("SELECT * FROM product_factor WHERE id = ?", (product_factor_id,))
+        product_factor_name = cursor.fetchone()["factor_name"]
+
+        product_factor_user_input = parse_product_factor_user_input(user_message, product_factor_name)
+        connection.execute("UPDATE product_factor SET user_input = ? WHERE id = ?", (product_factor_user_input, product_factor_id))
+    
+    # get all product factors for the current product description
+    cursor = connection.execute("SELECT * FROM product_factor WHERE product_description_id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
+    current_product_factors = cursor.fetchall()
+    
+    factor_needs_user_input = None
+    for factor in current_product_factors:
+        if factor["user_input"] is None or factor["user_input"] == "":
+            factor_needs_user_input = factor["factor_name"]
+            break
+    
+    if factor_needs_user_input is not None:
+        generated_prompt = generate_prompt_for_factor(factor_needs_user_input)
+        connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
+                            (message_thread_id, user_id, generated_prompt,))
+        return flask.jsonify({"message": generated_prompt}), 200
+    else:
+        # start async task to generate real products
+        threading.Thread(target=generate_real_products, args=(message_thread_id, current_product_factors)).start()
+        return flask.jsonify({"move_to_compare": True}), 200
+
+
+def generate_real_products(message_thread_id: int, product_factors):
+    '''
+        This function should be able to generate real products from the product description and product factors
+        It should also generate values/ratings/descriptions for each product's factors
     '''
     pass

@@ -22,15 +22,27 @@ def parse_product_description(user_message: str) -> str:
     '''
     pass
 
-def parse_existing_factors(user_message: str) -> list:
+def parse_existing_factors(user_message: str):
     '''
         Send the user message to gemini and parse the existing factors from the response
     '''
     pass
 
-def parse_remaining_factors(user_message: str, existing_factors: list) -> list:
+def parse_remaining_factors(user_message: str, existing_factors):
     '''
         Send the user message to gemini and parse the remaining factors from the response
+    '''
+    pass
+
+def parse_product_factor_user_input(user_message: str, product_factor_name):
+    '''
+        Send the user message to gemini and parse the user input for the product factor
+    '''
+    pass
+
+def generate_prompt_for_factor(factor_name: str):
+    '''
+        Send the factor name to gemini and generate a prompt for the user to give input on the factor
     '''
     pass
 
