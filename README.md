@@ -23,13 +23,13 @@ GOOGLE_API_KEY={your api key}
 
 To run your flask app locally (make sure your virtual environment is activated!):
 ```
-flask run --app app --debug -p 3000
+flask run --debug -p 3000
 ```
 
 This will run flask as a development server locally with the IP as localhost (127.0.0.1) and 3000 as the port. If the port 3000 is not available, run it on any available port and make sure to set the correct port on the frontend interface.
 
 
-To run your flask app with an extenally visible server
+To run your flask app with an extenally visible server (accessing this from another device doesn't seem to work right now)
 ```
-flask run --app app --debug --host=0.0.0.0 
+flask run --debug --host=0.0.0.0 
 ```
