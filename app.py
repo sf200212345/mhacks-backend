@@ -30,7 +30,8 @@ def main():
 @app.route("/test-google/", methods=["GET"])
 def test_google():
     model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content("Say something crazy")
+    response = model.generate_content("Say hi to me")
+    print('this is the response', response)
     return flask.jsonify({"message": response.text}), 200
 
 
