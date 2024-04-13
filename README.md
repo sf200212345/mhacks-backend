@@ -15,6 +15,12 @@ To install dependencies (make sure you're inside your "backend" folder and your 
 pip install -r requirements.txt
 ```
 
+Make sure you add your google api key to a .env file locally. i.e. add the following line to a .env file in this folder:
+```
+GOOGLE_API_KEY={your api key}
+```
+
+
 To run your flask app locally (make sure your virtual environment is activated!):
 ```
 flask run --app app --debug -p 3000
