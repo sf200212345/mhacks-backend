@@ -17,7 +17,13 @@ flask_cors.CORS(app)
 
 @app.route("/")
 def main():
-    return flask.jsonify({"message": "you have reached the root of the backend :)"}), 200
+    connection = get_db()
+    cursor = connection.execute(
+        "SELECT * FROM user WHERE username = ?", ("AI",)
+    )
+    user = cursor.fetchone()
+
+    return flask.jsonify(**user), 200
 
 
 @app.route("/test-google/", methods=["GET"])
