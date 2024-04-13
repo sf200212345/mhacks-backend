@@ -11,3 +11,11 @@ def test_google():
     model = genai.GenerativeModel('gemini-pro')
     response = model.generate_content("Say something crazy")
     return flask.jsonify({"message": response.text}), 200
+
+
+def process_user_message():
+    pass
+
+
+def get_compare_list():
+    pass
