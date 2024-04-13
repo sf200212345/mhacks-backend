@@ -9,9 +9,28 @@ genai.configure(api_key=GOOGLE_API_KEY)
 RETRY_INTERVALS = [1, 2, 4, 8, 16, 32]
 
 
+def classify_user_message(user_message: str) -> str:
+    '''
+        This function should take in a user message and return the classification of the message
+        Classification can be: has tech product, no product, other product
+    '''
+    pass
+
 def parse_product_description(user_message: str) -> str:
     ''''
         Send the user message to gemini and parse the product description from the response
+    '''
+    pass
+
+def parse_existing_factors(user_message: str) -> list:
+    '''
+        Send the user message to gemini and parse the existing factors from the response
+    '''
+    pass
+
+def parse_remaining_factors(user_message: str, existing_factors: list) -> list:
+    '''
+        Send the user message to gemini and parse the remaining factors from the response
     '''
     pass
 

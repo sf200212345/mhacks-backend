@@ -58,14 +58,15 @@ def process_user_message():
         return flask.jsonify({"message": "Request body is empty"}), 400
     
 
+    connection = get_db()
     if request_body.get("message_thread_id") is None:
         # first message in the thread
-        error = handle_first_message(request_body)
+        error = handle_first_message(request_body, connection)
         if error:
             return flask.jsonify({"message": error}), 400
     
     # normal handling for messages
-    return handle_message_generic(request_body)
+    return handle_message_generic(request_body, connection)
 
 
 @app.route("/get-compare-list/", methods=["POST"])
