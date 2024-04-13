@@ -20,19 +20,19 @@ def main():
     return flask.jsonify({"message": "you have reached the root of the backend :)"}), 200
 
 
-@app.route("/test-google", methods=["GET"])
+@app.route("/test-google/", methods=["GET"])
 def test_google():
     model = genai.GenerativeModel('gemini-pro')
     response = model.generate_content("Say something crazy")
     return flask.jsonify({"message": response.text}), 200
 
 
-@app.route("/process-user-message", methods=["POST"])
+@app.route("/process-user-message/", methods=["POST"])
 def process_user_message():
     pass
 
 
-@app.route("/get-compare-list", methods=["POST"])
+@app.route("/get-compare-list/", methods=["POST"])
 def get_compare_list():
     pass
 
