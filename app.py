@@ -61,7 +61,7 @@ def process_user_message():
     
 
     connection = get_db()
-    user_message_parsed = True
+    user_message_parsed = False
     if request_body.get("message_thread_id") is None:
         # first message in the thread
         error, message_thread_id = handle_first_message(request_body, connection)
