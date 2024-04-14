@@ -1,7 +1,5 @@
 from google_api import *
 import flask
-import threading
-from app import get_db
 
 
 def handle_first_message(request_body, connection) -> str:
@@ -96,17 +94,16 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
                             (message_thread_id, user_id, generated_prompt,))
         return flask.jsonify({"message": generated_prompt}), 200
-    # start async task to generate real products
-    threading.Thread(target=generate_real_products, args=(message_thread_id, current_product_factors)).start()
+    
+    generate_real_products(message_thread_id, current_product_factors, connection)
     return flask.jsonify({"move_to_compare": True}), 200
 
 
-def generate_real_products(message_thread_id: int, product_factors):
+def generate_real_products(message_thread_id: int, product_factors, connection):
     '''
         This function should be able to generate real products from the product description and product factors
         It should also generate values/ratings/descriptions for each product's factors
     '''
-    connection = get_db()
     cursor = connection.execute("SELECT * FROM product_description WHERE id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
     current_described_product = cursor.fetchone()
     product_description = current_described_product["product_description"]

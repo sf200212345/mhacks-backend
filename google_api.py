@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import os
 import time
-
+import json
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -14,7 +14,11 @@ def classify_user_message(user_message: str) -> str:
         This function should take in a user message and return the classification of the message
         Classification can be: has tech product, no product, other product
     '''
-    pass
+    prompt = f"""
+
+"""
+    generated_text = generic_google_request("gemini-pro", prompt, response_mime_type="application/json")
+
 
 def parse_product_description(user_message: str) -> str:
     ''''
@@ -67,8 +71,22 @@ def generate_real_product_factor_ratings_using_product(product_description, prod
     '''
     pass
 
+
+def text_to_json(text: str):
+    '''
+        This function should take in a text response from the google api and convert it to a json response
+    '''
+    cleaned_text = text.replace("\n", "").replace("\r", "").replace("\t", "").replace('`', '').strip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=|;':,.<>?/\\\"~`")
+    try:
+        output = json.loads(cleaned_text)
+    except json.JSONDecodeError:
+        print(f"Failed to convert text to json: {cleaned_text}")
+        return "", False
+    
+    return output, True
+
 # change response_mime_type to application/json if you want a json response
-def generic_google_request(model_name: str, prompt: str, response_mime_type="text/plain"):
+def generic_google_request(model_name: str, prompt: str, response_type="text"):
     '''
         This function should be able to take in a model name and prompt, then return the response from the model
         Use this function to make requests to the google api
@@ -79,12 +97,19 @@ def generic_google_request(model_name: str, prompt: str, response_mime_type="tex
             model = genai.GenerativeModel(
                 model_name,
                 generation_config=genai.GenerationConfig(
-                    response_mime_type=response_mime_type,
+                    temperature=1.0,
                 ),
             )
             response = model.generate_content(prompt)
-            return response.text
+            if response_type == "json":
+                output, success = text_to_json(response.text)
+                if success:
+                    return output
+                # otherwise try generating again using for loop
+            else:
+                return response.text
         except Exception as e:
+            print(f"Failed on attempt {index + 1} with error: {e}")
             if index == len(RETRY_INTERVALS) - 1:
                 raise e
             time.sleep(interval)

@@ -5,6 +5,7 @@ import pathlib
 import os
 import google.generativeai as genai
 from process_helpers import *
+from google_api import generic_google_request
 
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -18,6 +19,7 @@ flask_cors.CORS(app)
 
 @app.route("/")
 def main():
+    # verify db is setup and basic routing works
     connection = get_db()
     cursor = connection.execute(
         "SELECT * FROM user WHERE username = ?", ("AI",)
@@ -29,10 +31,9 @@ def main():
 
 @app.route("/test-google/", methods=["GET"])
 def test_google():
-    model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content("Say hi to me")
-    print('this is the response', response)
-    return flask.jsonify({"message": response.text}), 200
+    prompt = "Give me a list of exactly 5 laptops for gaming. For each laptop, tell me the price and OS. Respond in JSON output format and do not output anything else."
+    response = generic_google_request("models/gemini-1.5-pro-latest", prompt, response_type="json")
+    return flask.jsonify(*response), 200
 
 
 @app.route("/process-user-message/", methods=["POST"])
