@@ -93,14 +93,26 @@ def generate_real_products_using_ai(product_description: str, product_factors):
     '''
         Send the product description and factors to gemini and generate real products
     '''
-    pass
+    prompt = f"""
+
+"""
+    # this should just be an array of strings
+    generated_products = generic_google_request("models/gemini-1.5-pro-latest", prompt, response_type="json")
+    return generated_products
+
 
 def generate_real_product_factors_using_product(product_description: str, product_name: str, product_factors):
     '''
         Send the product description, product, and factors to gemini and generate real product values/descriptions
         For only the entered product
     '''
-    pass
+    prompt = f"""
+
+"""
+    # tell the model to put the ids in product_factors into the output as well
+    # this should be an array of objects with value, description and id as keys
+    generated_factors = generic_google_request("models/gemini-pro", prompt, response_type="json")
+    return generated_factors
 
 
 def generate_real_product_factor_ratings_using_product(product_description, product_name, product_factors):
@@ -108,7 +120,13 @@ def generate_real_product_factor_ratings_using_product(product_description, prod
         Send the product description, product, and factors to gemini and generate real product ratings
         For only the entered product
     '''
-    pass
+    prompt = f"""
+
+"""
+    # tell the model to put the ids in product_factors into the output as well
+    # this should be an array of objects with rating and id as keys
+    generated_ratings = generic_google_request("models/gemini-pro", prompt, response_type="json")
+    return generated_ratings
 
 
 def clean_generated_text(text: str) -> str:
