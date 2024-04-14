@@ -1,13 +1,18 @@
 ### get sqlite3
+```
 sudo apt-get install sqlite3
+```
 
 ### create a db file using the provided sql - it's important for the name to be the same!
+```
 sqlite3 db.sqlite3 < sql/schema.sql
+```
 
 ### to reset the db
+```
 rm db.sqlite3
 sqlite3 db.sqlite3 < sql/schema.sql
-
+```
 
 You will need to set up a python virtual environment for this section.
 Use the following to create a virtual environment. Make sure you are inside the "backend" folder when doing this.
