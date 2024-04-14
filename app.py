@@ -60,13 +60,14 @@ def process_user_message():
     
 
     connection = get_db()
-    user_message_parsed = False
+    user_message_parsed = True
     if request_body.get("message_thread_id") is None:
         # first message in the thread
-        error = handle_first_message(request_body, connection)
+        error, message_thread_id = handle_first_message(request_body, connection)
         if error:
             return flask.jsonify({"message": error}), 400
         user_message_parsed = True
+        request_body['message_thread_id'] = message_thread_id
     
     # normal handling for messages
     return handle_message_generic(request_body, connection, user_message_parsed)

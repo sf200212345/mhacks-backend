@@ -10,6 +10,8 @@ RETRY_INTERVALS = [1, 2, 4, 8, 16, 32]
 
 
 def change_factors_into_string(factors):
+    if len(factors) == 0:
+        return "No factors specified."
     if factors[0].get('id') is not None:
         return "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}, id = {factor["id"]}' for factor in factors])
     return "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}' for factor in factors])
@@ -191,8 +193,8 @@ The user has specified the following factors and user inputs for these factors:
 {product_factors_str}
 ```
 The user is currently consider the product {product_name}.
-For each factor specified above, generate a rating between 0 and 100 for that factor for this current product.
-This rating should reflect how well this product meets the user's input for this factor.
+For each factor specified above, generate a rating between 50 and 100 for that factor for this current product.
+This rating should reflect how well this product meets the user's input for this factor and should be as specific of a number as possible.
 This should be output as an array of objects with the keys "rating" and "id", where "rating" is the rating of the factor and "id" is the id of the factor from above.
 Output only this array of objects and nothing else in JSON output format.
 """
@@ -218,19 +220,23 @@ def text_to_json(text: str):
     
     return output, True
 
-# change response_mime_type to application/json if you want a json response
 def generic_google_request(model_name: str, prompt: str, response_type="text"):
+    output = generic_google_request_call(model_name, prompt, response_type)
+    print(f"Output for prompt: {prompt} is: {output}")
+    return output
+
+def generic_google_request_call(model_name: str, prompt: str, response_type="text"):
     '''
         This function should be able to take in a model name and prompt, then return the response from the model
         Use this function to make requests to the google api
     '''
     global RETRY_INTERVALS
-    system_instruction = "You are recommending users real tech products based on their input. You will be given a user's message and you will need to generate exactly what the prompt asks of you."
+    # system_instruction = "You are recommending users real tech products based on their input. You will be given a user's message and you will need to generate exactly what the prompt asks of you."
     for index, interval in enumerate(RETRY_INTERVALS):
         try:
             model = genai.GenerativeModel(
                 model_name,
-                system_instruction=system_instruction,
+                # system_instruction=system_instruction,
                 generation_config=genai.GenerationConfig(
                     temperature=1.0,
                 ),
