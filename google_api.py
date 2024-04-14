@@ -231,12 +231,12 @@ def generic_google_request_call(model_name: str, prompt: str, response_type="tex
         Use this function to make requests to the google api
     '''
     global RETRY_INTERVALS
-    # system_instruction = "You are recommending users real tech products based on their input. You will be given a user's message and you will need to generate exactly what the prompt asks of you."
+    system_instruction = "You are recommending users real tech products based on their input. You will be given a user's message and you will need to generate exactly what the prompt asks of you. The user will likely be a tech noice, so don't use overly technical terms."
     for index, interval in enumerate(RETRY_INTERVALS):
         try:
             model = genai.GenerativeModel(
                 model_name,
-                # system_instruction=system_instruction,
+                system_instruction=system_instruction,
                 generation_config=genai.GenerationConfig(
                     temperature=1.0,
                 ),
