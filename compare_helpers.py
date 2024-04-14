@@ -43,7 +43,8 @@ def get_compare_list_db(request_body, connection):
                 curr_product_factors[curr_factor_name]["value"] = factor['generated_value']
                 curr_product_factors[curr_factor_name]["description"] = factor['generated_description']
             
-            curr_product["attributes"] = curr_product_factors
+
+            curr_product["attributes"] = [{"attributeName": name,"attributeValue": factor['value'], "attributeRating": factor['rating']} for name, factor in curr_product_factors.items()]
 
             output.append(curr_product)
     else:
@@ -73,7 +74,7 @@ def get_compare_list_db(request_body, connection):
                 curr_product_factors[curr_factor_name]["value"] = factor['generated_value']
                 curr_product_factors[curr_factor_name]["description"] = factor['generated_description']
             
-            curr_product["attributes"] = curr_product_factors
+            curr_product["attributes"] = [{"attributeName": name,"attributeValue": factor['value'], "attributeRating": factor['rating']} for name, factor in curr_product_factors.items()]
 
             output.append(curr_product)
     print(len(output), "length of output")
