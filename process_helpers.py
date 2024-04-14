@@ -33,11 +33,10 @@ def handle_first_message(request_body, connection) -> str:
 
     # now ask for existing factors
     existing_factors = parse_existing_factors(user_message)
-    
 
     # now ask for remaining factors to reach 6 total
     remaining_factors = parse_remaining_factors(user_message, existing_factors)
-
+    num_factors = 0
     # add factors to db
     for factor_name, user_input in [*existing_factors, *remaining_factors]:
         if len(user_input) > 0:
@@ -46,6 +45,11 @@ def handle_first_message(request_body, connection) -> str:
         else:
             connection.execute("INSERT INTO product_factor (product_description_id, factor_name) VALUES (?, ?)",
                                 (product_description_id, factor_name,))
+        
+        num_factors += 1
+        # only allow 6 factors per product
+        if num_factors >= 6:
+            break
 
 
 def handle_message_generic(request_body, connection, user_message_parsed: bool):
