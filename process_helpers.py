@@ -92,10 +92,14 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
             break
 
     if factor_needs_user_input is not None:
-        generated_prompt = generate_prompt_for_factor(factor_needs_user_input)
+        generated_dict = generate_prompt_for_factor(factor_needs_user_input)
         connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
-                            (message_thread_id, user_id, generated_prompt,))
-        return flask.jsonify({"message": generated_prompt}), 200
+                            (message_thread_id, user_id, generated_dict["generated_prompt"],))
+        output_dictionary = {
+            "message": generated_dict["generated_prompt"],
+            "possible_values": generated_dict["possible_values"]
+        }
+        return flask.jsonify(**output_dictionary), 200
     
     generate_real_products(message_thread_id, current_product_factors, connection)
     return flask.jsonify({"move_to_compare": True}), 200

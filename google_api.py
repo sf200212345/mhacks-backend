@@ -76,7 +76,18 @@ def generate_prompt_for_factor(factor_name: str):
     '''
         Send the factor name to gemini and generate a prompt for the user to give input on the factor
     '''
-    pass
+    prompt = f"""
+
+"""
+    # force two keys to be defined: generated_prompt and possible_values corresponding to possible values for the factor_name
+    generated_dict = generic_google_request("models/gemini-pro", prompt, response_type="json")
+    if generated_dict.get("generated_prompt") is None:
+        generated_dict["generated_prompt"] = "Sorry, we weren't able to generate a prompt for this factor."
+    if generated_dict.get("possible_values") is None or not isinstance(generated_dict.get("possible_values"), list):
+        generated_dict["generated_prompt"] += "Sorry, we weren't able to generate possible values for this factor."
+        generated_dict["possible_values"] = ["Next factor"]
+    return generated_dict
+
 
 def generate_real_products_using_ai(product_description: str, product_factors):
     '''
