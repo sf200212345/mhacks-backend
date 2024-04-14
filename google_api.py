@@ -72,12 +72,6 @@ def parse_remaining_factors(user_message: str, existing_factors):
     return output
 
 
-def parse_product_factor_user_input(user_message: str, product_factor_name):
-    '''
-        Send the user message to gemini and parse the user input for the product factor
-    '''
-    pass
-
 def generate_prompt_for_factor(factor_name: str):
     '''
         Send the factor name to gemini and generate a prompt for the user to give input on the factor

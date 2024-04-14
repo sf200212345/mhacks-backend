@@ -77,22 +77,20 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         if request_body.get("product_factor_id") is not None and not isinstance(request_body.get("product_factor_id"), int):
             return flask.jsonify({"message": "product_factor_id is not a number"}), 400
         product_factor_id = request_body.get("product_factor_id")
-        cursor = connection.execute("SELECT * FROM product_factor WHERE id = ?", (product_factor_id,))
-        product_factor_name = cursor.fetchone()["factor_name"]
 
-        product_factor_user_input = parse_product_factor_user_input(user_message, product_factor_name)
-        connection.execute("UPDATE product_factor SET user_input = ? WHERE id = ?", (product_factor_user_input, product_factor_id))
+        # currently make it so that the user can only input values sent by the backend as the message when we reach this step
+        connection.execute("UPDATE product_factor SET user_input = ? WHERE id = ?", (user_message, product_factor_id))
     
     # get all product factors for the current product description
     cursor = connection.execute("SELECT * FROM product_factor WHERE product_description_id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
     current_product_factors = cursor.fetchall()
-    
+
     factor_needs_user_input = None
     for factor in current_product_factors:
         if factor["user_input"] is None or factor["user_input"] == "":
             factor_needs_user_input = factor["factor_name"]
             break
-    
+
     if factor_needs_user_input is not None:
         generated_prompt = generate_prompt_for_factor(factor_needs_user_input)
         connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
