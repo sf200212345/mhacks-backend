@@ -108,12 +108,17 @@ Output only this array of strings and nothing else in JSON output format.
     return output
 
 
-def generate_prompt_for_factor(factor_name: str):
+def generate_prompt_for_factor(factor_name: str, product_description: str):
     '''
         Send the factor name to gemini and generate a prompt for the user to give input on the factor
     '''
     prompt = f"""
-
+The user is asking for a recommendation for {product_description}.
+Here is a factor that the user wants to consider: {factor_name}.
+Please generate a prompt for the user to give input on this factor, as well as an array of possible values for this factor.
+As an example, if the factor is "color", the prompt could be "What color would you like the {product_description} to be?" and the possible values could be ["red", "blue", "green", "black", "white"].
+Output an object with the keys "generated_prompt" and "possible_values", where "generated_prompt" is the prompt for the user and "possible_values" is the array of strings for the possible values.
+Output only this object and nothing else in JSON output format.
 """
     # force two keys to be defined: generated_prompt and possible_values corresponding to possible values for the factor_name
     generated_dict = generic_google_request("models/gemini-pro", prompt, response_type="json")

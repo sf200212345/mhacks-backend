@@ -68,6 +68,11 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         return flask.jsonify({"message": "message_thread_id is missing or not a number"}), 400
     message_thread_id = request_body.get("message_thread_id")
 
+    cursor = connection.execute("SELECT * FROM product_description WHERE id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
+    product_description_obj = cursor.fetchone()
+    product_description = product_description_obj["product_description"]
+    product_description_id = product_description_obj["id"]
+
     # save message to db
     connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
                         (message_thread_id, user_id, user_message,))
@@ -82,7 +87,7 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         connection.execute("UPDATE product_factor SET user_input = ? WHERE id = ?", (user_message, product_factor_id))
     
     # get all product factors for the current product description
-    cursor = connection.execute("SELECT * FROM product_factor WHERE product_description_id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
+    cursor = connection.execute("SELECT * FROM product_factor WHERE product_description_id = ?", (product_description_id,))
     current_product_factors = cursor.fetchall()
 
     factor_needs_user_input = None
@@ -92,7 +97,7 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
             break
 
     if factor_needs_user_input is not None:
-        generated_dict = generate_prompt_for_factor(factor_needs_user_input)
+        generated_dict = generate_prompt_for_factor(factor_needs_user_input, product_description)
         connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
                             (message_thread_id, user_id, generated_dict["generated_prompt"],))
         output_dictionary = {
