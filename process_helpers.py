@@ -1,6 +1,8 @@
 from google_api import *
 import flask
 import threading
+from app import get_db
+
 
 def handle_first_message(request_body, connection) -> str:
     '''
@@ -94,10 +96,9 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         connection.execute("INSERT INTO message (message_thread_id, user_id, message_content) VALUES (?, ?, ?)",
                             (message_thread_id, user_id, generated_prompt,))
         return flask.jsonify({"message": generated_prompt}), 200
-    else:
-        # start async task to generate real products
-        threading.Thread(target=generate_real_products, args=(message_thread_id, current_product_factors)).start()
-        return flask.jsonify({"move_to_compare": True}), 200
+    # start async task to generate real products
+    threading.Thread(target=generate_real_products, args=(message_thread_id, current_product_factors)).start()
+    return flask.jsonify({"move_to_compare": True}), 200
 
 
 def generate_real_products(message_thread_id: int, product_factors):
@@ -105,4 +106,23 @@ def generate_real_products(message_thread_id: int, product_factors):
         This function should be able to generate real products from the product description and product factors
         It should also generate values/ratings/descriptions for each product's factors
     '''
-    pass
+    connection = get_db()
+    cursor = connection.execute("SELECT * FROM product_description WHERE id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
+    current_described_product = cursor.fetchone()
+    product_description = current_described_product["product_description"]
+    product_description_id = current_described_product["id"]
+
+    real_products = generate_real_products_using_ai(product_description, product_factors)
+    for product in real_products:
+        product_name = product["product_name"]
+        cursor = connection.execute("INSERT INTO product (product_description_id, product_code) VALUES (?, ?)", (product_description_id, product_name))
+        product_id = cursor.lastrowid
+
+        current_product_factors = generate_real_product_factors_using_product(product_description, product_name, product_factors)
+        for factor_obj in current_product_factors.values():
+            connection.execute("INSERT INTO generated_product_factor (product_id, product_factor_id, generated_value, generated_description) VALUES (?, ?, ?, ?)",
+                               (product_id, factor_obj["id"], factor_obj["value"], factor_obj["description"]))
+        current_factor_ratings = generate_real_product_factor_ratings_using_product(product_description, product_name, product_factors)
+        for factor_obj in current_factor_ratings.values():
+            connection.execute("INSERT INTO product_factor_rating (product_id, product_factor_id, generated_rating) VALUES (?, ?, ?)",
+                               (product_id, factor_obj["id"], factor_obj["rating"]))

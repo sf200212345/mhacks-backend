@@ -46,6 +46,26 @@ def generate_prompt_for_factor(factor_name: str):
     '''
     pass
 
+def generate_real_products_using_ai(product_description: str, product_factors):
+    '''
+        Send the product description and factors to gemini and generate real products
+    '''
+    pass
+
+def generate_real_product_factors_using_product(product_description: str, product_name: str, product_factors):
+    '''
+        Send the product description, product, and factors to gemini and generate real product values/descriptions
+        For only the entered product
+    '''
+    pass
+
+
+def generate_real_product_factor_ratings_using_product(product_description, product_name, product_factors):
+    '''
+        Send the product description, product, and factors to gemini and generate real product ratings
+        For only the entered product
+    '''
+    pass
 
 # change response_mime_type to application/json if you want a json response
 def generic_google_request(model_name: str, prompt: str, response_mime_type="text/plain"):
