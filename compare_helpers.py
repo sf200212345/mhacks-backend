@@ -46,6 +46,7 @@ def get_compare_list_db(request_body, connection):
     else:
         cursor = connection.execute("SELECT * FROM product WHERE product_description_id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
         products = cursor.fetchall()
+        print(products, "products")
 
         for product in products:
             curr_product = {
@@ -55,13 +56,13 @@ def get_compare_list_db(request_body, connection):
             for factor_name in product_factors.values():
                 curr_product[factor_name] = {}
 
-            cursor = connection.execute("SELECT * FROM product_factor_rating WHERE product_id = ?", (product[0],))
+            cursor = connection.execute("SELECT * FROM product_factor_rating WHERE product_id = ?", (product['id'],))
             product_factor_ratings = cursor.fetchall()
             for rating in product_factor_ratings:
                 curr_factor_name = product_factors[rating['product_factor_id']]
                 curr_product[curr_factor_name]["rating"] = rating['generated_rating']
             
-            cursor = connection.execute("SELECT * FROM generated_product_factor WHERE product_id = ?", (product[0],))
+            cursor = connection.execute("SELECT * FROM generated_product_factor WHERE product_id = ?", (product['id'],))
             generated_product_factors = cursor.fetchall()
             for factor in generated_product_factors:
                 curr_factor_name = product_factors[factor['product_factor_id']]
@@ -69,5 +70,6 @@ def get_compare_list_db(request_body, connection):
                 curr_product[curr_factor_name]["description"] = factor['generated_description']
 
             output.append(curr_product)
+    print(len(output), "length of output")
     
     return flask.jsonify({"products": output}), 200
