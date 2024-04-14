@@ -107,7 +107,7 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
                             (message_thread_id, generated_dict["generated_prompt"],))
         output_dictionary = {
             "message": generated_dict["generated_prompt"],
-            "possible_values": generated_dict["possible_values"],
+            "possible_values": generated_dict["possible_values"] + ["I don't know"],
             "product_factor_id": factor_needs_user_input["id"],
             "message_thread_id": message_thread_id,
         }
