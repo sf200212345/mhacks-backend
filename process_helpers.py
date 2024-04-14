@@ -106,19 +106,15 @@ def handle_message_generic(request_body, connection, user_message_parsed: bool):
         }
         return flask.jsonify(**output_dictionary), 200
     
-    generate_real_products(message_thread_id, current_product_factors, connection)
+    generate_real_products(product_description_id, product_description, current_product_factors, connection)
     return flask.jsonify({"move_to_compare": True}), 200
 
 
-def generate_real_products(message_thread_id: int, product_factors, connection):
+def generate_real_products(product_description_id: int, product_description: str, product_factors, connection):
     '''
         This function should be able to generate real products from the product description and product factors
         It should also generate values/ratings/descriptions for each product's factors
     '''
-    cursor = connection.execute("SELECT * FROM product_description WHERE id = (SELECT product_description_id FROM message_thread WHERE id = ?)", (message_thread_id,))
-    current_described_product = cursor.fetchone()
-    product_description = current_described_product["product_description"]
-    product_description_id = current_described_product["id"]
 
     real_products = generate_real_products_using_ai(product_description, product_factors)
     for product in real_products:

@@ -9,6 +9,11 @@ genai.configure(api_key=GOOGLE_API_KEY)
 RETRY_INTERVALS = [1, 2, 4, 8, 16, 32]
 
 
+def change_factors_into_string(factors):
+    if factors[0].get('id') is not None:
+        return "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}, id = {factor["id"]}' for factor in factors])
+    return "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}' for factor in factors])
+
 def classify_user_message(user_message: str) -> str:
     '''
         This function should take in a user message and return the classification of the message
@@ -83,7 +88,7 @@ def parse_remaining_factors(user_message: str, existing_factors, product_descrip
     '''
         Send the user message to gemini and parse the remaining factors from the response
     '''
-    existing_factors_str = "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}' for factor in existing_factors])
+    existing_factors_str = change_factors_into_string(existing_factors)
     prompt = f"""
 Here is the user's latest message:
 ```
@@ -134,8 +139,15 @@ def generate_real_products_using_ai(product_description: str, product_factors):
     '''
         Send the product description and factors to gemini and generate real products
     '''
+    product_factors_str = change_factors_into_string(product_factors)
     prompt = f"""
-
+The user is asking for a recommendation for {product_description}.
+The user has specified the following factors and user inputs for these factors:
+```
+{product_factors_str}
+```
+Please generate a list of exactly 5 real tech products that match the user's description and factors for this product.
+This should be a list of strings. Output only this list of strings and nothing else in JSON output format.
 """
     # this should just be an array of strings
     generated_products = generic_google_request("models/gemini-1.5-pro-latest", prompt, response_type="json")
@@ -147,8 +159,18 @@ def generate_real_product_factors_using_product(product_description: str, produc
         Send the product description, product, and factors to gemini and generate real product values/descriptions
         For only the entered product
     '''
+    product_factors_str = change_factors_into_string(product_factors)
     prompt = f"""
-
+The user is asking for a recommendation for {product_description}.
+The user has specified the following factors and user inputs for these factors:
+```
+{product_factors_str}
+```
+The user is currently consider the product {product_name}.
+For each factor specified above, generate what that factor's value would be for this current product.
+Also, generate a description for what each product's value means and justify why this product has this value for this factor.
+This should be output as an array of objects with the keys "value", "description", and "id", where "value" is the value of the factor, "description" is the description of the value, and "id" is the id of the factor from above.
+Output only this array of objects and nothing else in JSON output format.
 """
     # tell the model to put the ids in product_factors into the output as well
     # this should be an array of objects with value, description and id as keys
@@ -161,8 +183,18 @@ def generate_real_product_factor_ratings_using_product(product_description, prod
         Send the product description, product, and factors to gemini and generate real product ratings
         For only the entered product
     '''
+    product_factors_str = change_factors_into_string(product_factors)
     prompt = f"""
-
+The user is asking for a recommendation for {product_description}.
+The user has specified the following factors and user inputs for these factors:
+```
+{product_factors_str}
+```
+The user is currently consider the product {product_name}.
+For each factor specified above, generate a rating between 0 and 100 for that factor for this current product.
+This rating should reflect how well this product meets the user's input for this factor.
+This should be output as an array of objects with the keys "rating" and "id", where "rating" is the rating of the factor and "id" is the id of the factor from above.
+Output only this array of objects and nothing else in JSON output format.
 """
     # tell the model to put the ids in product_factors into the output as well
     # this should be an array of objects with rating and id as keys
