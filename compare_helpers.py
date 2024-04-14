@@ -24,23 +24,26 @@ def get_compare_list_db(request_body, connection):
             product = cursor.fetchone()
             curr_product = {
                 "product_id": product['id'],
-                "product_name": product['product_code'],
+                "name": product['product_code'],
             }
+            curr_product_factors = {}
             for factor_name in product_factors.values():
-                curr_product[factor_name] = {}
+                curr_product_factors[factor_name] = {}
 
             cursor = connection.execute("SELECT * FROM product_factor_rating WHERE product_id = ?", (product[0],))
             product_factor_ratings = cursor.fetchall()
             for rating in product_factor_ratings:
                 curr_factor_name = product_factors[rating['product_factor_id']]
-                curr_product[curr_factor_name]["rating"] = rating['generated_rating']
+                curr_product_factors[curr_factor_name]["rating"] = rating['generated_rating']
             
             cursor = connection.execute("SELECT * FROM generated_product_factor WHERE product_id = ?", (product[0],))
             generated_product_factors = cursor.fetchall()
             for factor in generated_product_factors:
                 curr_factor_name = product_factors[factor['product_factor_id']]
-                curr_product[curr_factor_name]["value"] = factor['generated_value']
-                curr_product[curr_factor_name]["description"] = factor['generated_description']
+                curr_product_factors[curr_factor_name]["value"] = factor['generated_value']
+                curr_product_factors[curr_factor_name]["description"] = factor['generated_description']
+            
+            curr_product["attributes"] = curr_product_factors
 
             output.append(curr_product)
     else:
@@ -51,23 +54,26 @@ def get_compare_list_db(request_body, connection):
         for product in products:
             curr_product = {
                 "product_id": product['id'],
-                "product_name": product['product_code'],
+                "name": product['product_code'],
             }
+            curr_product_factors = {}
             for factor_name in product_factors.values():
-                curr_product[factor_name] = {}
+                curr_product_factors[factor_name] = {}
 
-            cursor = connection.execute("SELECT * FROM product_factor_rating WHERE product_id = ?", (product['id'],))
+            cursor = connection.execute("SELECT * FROM product_factor_rating WHERE product_id = ?", (product[0],))
             product_factor_ratings = cursor.fetchall()
             for rating in product_factor_ratings:
                 curr_factor_name = product_factors[rating['product_factor_id']]
-                curr_product[curr_factor_name]["rating"] = rating['generated_rating']
+                curr_product_factors[curr_factor_name]["rating"] = rating['generated_rating']
             
-            cursor = connection.execute("SELECT * FROM generated_product_factor WHERE product_id = ?", (product['id'],))
+            cursor = connection.execute("SELECT * FROM generated_product_factor WHERE product_id = ?", (product[0],))
             generated_product_factors = cursor.fetchall()
             for factor in generated_product_factors:
                 curr_factor_name = product_factors[factor['product_factor_id']]
-                curr_product[curr_factor_name]["value"] = factor['generated_value']
-                curr_product[curr_factor_name]["description"] = factor['generated_description']
+                curr_product_factors[curr_factor_name]["value"] = factor['generated_value']
+                curr_product_factors[curr_factor_name]["description"] = factor['generated_description']
+            
+            curr_product["attributes"] = curr_product_factors
 
             output.append(curr_product)
     print(len(output), "length of output")
