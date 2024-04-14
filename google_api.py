@@ -15,7 +15,15 @@ def classify_user_message(user_message: str) -> str:
         Classification can be: has tech product, no product, other product
     '''
     prompt = f"""
-
+Here is the user's latest message:
+```
+{user_message}
+```
+Please classify the message as one of the following:
+1. has tech product (if the user's message contains a request for a tech product recommendation)
+2. no product (if the user's message does not contain a request for a tech product recommendation)
+3. other product (if the user's message contains a request for a product that is not a tech product)
+Output only one of ["has tech product", "no product", "other product"]. Do not output anything else.
 """
     generated_text = generic_google_request("models/gemini-pro", prompt, response_type="text")
     if "no" in generated_text.lower():
@@ -30,18 +38,33 @@ def parse_product_description(user_message: str) -> str:
         Send the user message to gemini and parse the product description from the response
     '''
     prompt = f"""
-
+Here is the user's latest message:
+```
+{user_message}
+```
+This message contains a request for a tech product recommendation.
+Please extract what product the user wants a recommendation for from the message. Output this product and nothing else.
 """
     generated_text = generic_google_request("models/gemini-pro", prompt, response_type="text")
     return generated_text
 
 
-def parse_existing_factors(user_message: str):
+def parse_existing_factors(user_message: str, product_description: str):
     '''
         Send the user message to gemini and parse the existing factors from the response
     '''
     prompt = f"""
-
+Here is the user's latest message:
+```
+{user_message}
+```
+This message contains a request for a recommendation for {product_description}.
+Please extract any factors the user wants to consider from their message.
+Examples of such factors are: price, speed, color, etc. Do not be limited to these options only.
+Output an array of objects with the keys "factor_name" and "user_input".
+The "factor_name" should be the name of the factor and "user_input" should be the user's input for that factor.
+If the user did not specify an input for a factor, the "user_input" should be an empty string.
+Output only this array of objects and nothing else in JSON output format.
 """
     # this should be an array of objects with factor_name and user_input keys
     # user input should have an empty string if no user input was found by the model
@@ -56,12 +79,25 @@ def parse_existing_factors(user_message: str):
     return output
 
 
-def parse_remaining_factors(user_message: str, existing_factors):
+def parse_remaining_factors(user_message: str, existing_factors, product_description: str):
     '''
         Send the user message to gemini and parse the remaining factors from the response
     '''
+    existing_factors_str = "\n".join([f'factor_name = {factor["factor_name"]}, user_input = {factor["user_input"]}' for factor in existing_factors])
     prompt = f"""
-
+Here is the user's latest message:
+```
+{user_message}
+```
+This message contains a request for a recommendation for {product_description}.
+The user has already specified the following {len(existing_factors)} factors:
+```
+{existing_factors_str}
+```
+I want to generate {6 - len(existing_factors)} more factors for the user to consider for this product.
+Examples of such factors are: price, speed, color, etc. Do not be limited to these options only.
+Output an array of strings with the names of the factors the user wants to consider.
+Output only this array of strings and nothing else in JSON output format.
 """
     # this should be an array of strings. Should only generate 6 - len(existing_factors) strings
     generated_array = generic_google_request("models/gemini-pro", prompt, response_type="json")

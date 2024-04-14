@@ -32,10 +32,10 @@ def handle_first_message(request_body, connection) -> str:
     cursor = connection.execute("INSERT INTO message_thread (user_id, product_description_id) VALUES (?, ?)", (user_id, product_description_id))
 
     # now ask for existing factors
-    existing_factors = parse_existing_factors(user_message)
+    existing_factors = parse_existing_factors(user_message, product_description)
 
     # now ask for remaining factors to reach 6 total
-    remaining_factors = parse_remaining_factors(user_message, existing_factors)
+    remaining_factors = parse_remaining_factors(user_message, existing_factors, product_description)
     num_factors = 0
     # add factors to db
     for factor_name, user_input in [*existing_factors, *remaining_factors]:
