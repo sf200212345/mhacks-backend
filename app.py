@@ -6,6 +6,7 @@ import os
 import google.generativeai as genai
 from process_helpers import *
 from google_api import generic_google_request
+from compare_helpers import *
 
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -80,7 +81,13 @@ def get_compare_list():
         or a user's message thread id that they want to compare the products from.
         For each product id, return all the generated product factors/generated ratings for the product as a dictionary
     '''
-    pass
+    request_body = flask.request.get_json()
+    if request_body is None:
+        return flask.jsonify({"message": "Request body is empty"}), 400
+    if request_body.get("message_thread_id") is None:
+        return flask.jsonify({"message": "message_thread_id is missing"}), 400
+    connection = get_db()
+    return get_compare_list_db(request_body, connection)
 
 
 #------------------------------------------------------------------------------------------
