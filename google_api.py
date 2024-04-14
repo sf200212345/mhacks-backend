@@ -82,7 +82,10 @@ Output only this array of objects and nothing else in JSON output format.
         user_input = item.get("user_input")
         if user_input is None:
             user_input = ""
-        output.append([factor_name, user_input])
+        output.append({
+            "factor_name": factor_name,
+            "user_input": user_input,
+        })
     return output
 
 
